@@ -12,6 +12,7 @@
     "type": "git",
     "url": "https://github.com/Terennikov/express-mesto-ghat"
   },
+  "type": "module",
   "author": "Daniil Terennikov",
   "license": "ISC",
   "devDependencies": {
