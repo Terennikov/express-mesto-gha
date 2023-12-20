@@ -48,7 +48,7 @@ export const createUser = async (req, res) => {
 };
 
 function findByIdAndUpdate(reqId, reqBody) {
-  const currentUser = User.findByIdAndUpdate(reqId, reqBody, { new: true });
+  const currentUser = User.findByIdAndUpdate(reqId, reqBody, { new: true, runValidators: true });
   if (!currentUser) {
     throw new mongoose.Error.DocumentNotFoundError();
   }

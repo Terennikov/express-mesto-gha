@@ -18,7 +18,7 @@ export const createCard = async (req, res) => {
       link: req.body.link,
       owner: req.user._id,
     });
-    return res.status(StatusCodes.OK).send(await card.save()); // карточка
+    return res.status(201).send(await card.save()); // карточка
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Ошибка валидации', error: error.message });
