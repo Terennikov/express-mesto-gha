@@ -9,7 +9,8 @@ config();
 const app = express();
 app.use(helmet());
 
-mongoose.connect(process.env.DB_CONN);
+// mongoose.connect(process.env.DB_CONN);
+mongoose.connect('mongodb://localhost:27017/mestodb');
 app.use(json());
 app.use((req, res, next) => {
   req.user = {
