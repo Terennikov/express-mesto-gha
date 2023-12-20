@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { StatusCodes } from 'http-status-codes';
-import User from '../models/User';
+import User from '../models/User.js';
 
 const ERROR_CODE_DUPLICATE_MONGO = 11000;
 
