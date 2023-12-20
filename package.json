@@ -1,0 +1,29 @@
+{
+  "name": "express-mesto-gha",
+  "version": "1.0.0",
+  "description": "Проект Mesto бэкенд",
+  "main": "app.js",
+  "scripts": {
+    "start": "node --experimental-modules --es-module-specifier-resolution=node --trace-warnings app.js",
+    "dev": "nodemon --experimental-modules --es-module-specifier-resolution=node --trace-warnings app.js",
+    "lint": "npx eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Terennikov/express-mesto-ghat"
+  },
+  "author": "Daniil Terennikov",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^8.55.0",
+    "nodemon": "^3.0.2",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "mongoose": "^8.0.3"
+  }
+}
