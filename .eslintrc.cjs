@@ -24,5 +24,6 @@ module.exports = {
   rules: {
     'no-underscore-dangle': ['error', { allow: ['_id'] }],
     'import/no-extraneous-dependencies': ['error', { devDependencies: false }],
+    'no-console': 0,
   },
 };
