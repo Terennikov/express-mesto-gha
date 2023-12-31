@@ -1,52 +1,61 @@
 import mongoose from 'mongoose';
 import { StatusCodes } from 'http-status-codes';
 import Card from '../models/Card';
+import BadRequestError from '../utils/errors/BadRequestError';
+import NotFoundError from '../utils/errors/NotFoundError';
+import NoAccessRightsError from '../utils/errors/NoAccessRightsError';
 
-export const getCards = async (req, res) => {
+export const getCards = async (req, res, next) => {
   try {
     const cards = await Card.find({});
     return res.status(StatusCodes.OK).send(cards); // массив карточек
   } catch (error) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка', error: error.message });
+    return next(error);
   }
 };
 
-export const createCard = async (req, res) => {
+export const createCard = async (req, res, next) => {
   try {
     const card = await new Card({
       name: req.body.name,
       link: req.body.link,
       owner: req.user._id,
     });
-    return res.status(201).send(await card.save()); // карточка
+    return res.status(StatusCodes.OK).send(await card.save({
+      runValidators: true,
+    }));
   } catch (error) {
-    if (error instanceof mongoose.Error.ValidationError) {
-      return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Ошибка валидации', error: error.message });
+    if (error instanceof mongoose.Error.CastError) {
+      return next(new BadRequestError(error));
     }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка', error: error.message });
+    if (error instanceof mongoose.Error.ValidationError) {
+      return next(new BadRequestError(error));
+    }
+    return next(error);
   }
 };
 
-export const deleteCard = async (req, res) => {
+export const deleteCard = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const card = await Card.findByIdAndDelete({ _id: id });
+    const card = await Card.findById({ _id: id });
     if (!card) {
-      throw new mongoose.Error.DocumentNotFoundError();
+      throw new NotFoundError('Карточка по id не найдена');
     }
-    return res.status(StatusCodes.OK).send({ message: 'Пост удален' });
+    const cardOwner = card.owner.toString().replace('new ObjectId', '');
+    if (cardOwner === req.user._id) {
+      await Card.deleteOne(card);
+      return res.status(StatusCodes.OK).send({ message: 'Пост удален' });
+    } throw new NoAccessRightsError('Можно удалять только свои карточки');
   } catch (error) {
-    if (error instanceof mongoose.Error.DocumentNotFoundError) {
-      return res.status(StatusCodes.NOT_FOUND).send({ message: 'Карточка по id не найдена', error: error.message });
-    }
     if (error instanceof mongoose.Error.CastError) {
-      return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Передан не валидный id', error: error.message });
+      return next(new BadRequestError('Передан не валидный id'));
     }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка', error: error.message });
+    return next(error);
   }
 };
 
-export const likeCard = async (req, res) => {
+export const likeCard = async (req, res, next) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.id,
@@ -54,21 +63,18 @@ export const likeCard = async (req, res) => {
       { new: true },
     );
     if (!card) {
-      throw new mongoose.Error.DocumentNotFoundError();
+      throw new NotFoundError('Карточка по id не найдена');
     }
     return res.status(StatusCodes.OK).send(card); //  карточка
   } catch (error) {
-    if (error instanceof mongoose.Error.DocumentNotFoundError) {
-      return res.status(StatusCodes.NOT_FOUND).send({ message: 'Карточка по id не найдена', error: error.message });
-    }
     if (error instanceof mongoose.Error.CastError) {
-      return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Передан не валидный id', error: error.message });
+      next(new BadRequestError('Передан не валидный id'));
     }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка', error: error.message });
+    return next(error);
   }
 };
 
-export const deleteLike = async (req, res) => {
+export const deleteLike = async (req, res, next) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.id,
@@ -76,16 +82,13 @@ export const deleteLike = async (req, res) => {
       { new: true },
     );
     if (!card) {
-      throw new mongoose.Error.DocumentNotFoundError();
+      throw new NotFoundError('Карточка по id не найдена');
     }
     return res.status(StatusCodes.OK).send(card); //  карточка
   } catch (error) {
-    if (error instanceof mongoose.Error.DocumentNotFoundError) {
-      return res.status(StatusCodes.NOT_FOUND).send({ message: 'Карточка по id не найдена', error: error.message });
-    }
     if (error instanceof mongoose.Error.CastError) {
-      return res.status(StatusCodes.BAD_REQUEST).send({ message: 'Передан не валидный id', error: error.message });
+      return next(new BadRequestError('Передан не валидный id'));
     }
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({ message: 'На сервере произошла ошибка', error: error.message });
+    return next(error);
   }
 };

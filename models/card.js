@@ -1,16 +1,21 @@
 import mongoose from 'mongoose';
+import URLREGEXP from '../utils/constans';
 
 const cardSheme = new mongoose.Schema(
   {
     name: {
       type: String,
       required: true,
-      minlenght: 2,
-      maxlenght: 30,
+      minlenght: [2, 'Минимальная длинна 2 символа'],
+      maxlenght: [30, 'Максимальная длинна 30 символов'],
     },
     link: {
       type: String,
       required: true,
+      validate: {
+        validator: (v) => URLREGEXP.test(v),
+        message: (props) => `${props.value} Не валидный URL адрес`,
+      },
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
@@ -28,7 +33,7 @@ const cardSheme = new mongoose.Schema(
     },
 
   },
-  // Options
+
   {
     versionKey: false,
     timestamps: true,

@@ -1,15 +1,14 @@
 import { Router } from 'express';
 import userRouter from './users';
 import cardRouter from './cards';
+import auth from '../middlewares/auth';
+import { checkSigninValidation, checkSignupValidation } from '../middlewares/joiAuthValidation';
+import { createUser, login } from '../controllers/users';
 
 const router = Router();
-router.use('/cards', cardRouter);
-router.use('/users', userRouter);
-
-router.use((req, res, next) => {
-  const error = new Error('Неправильный путь');
-  error.status = 404;
-  next(error);
-});
+router.post('/signup', checkSignupValidation, createUser);
+router.post('/signin', checkSigninValidation, login);
+router.use('/cards', auth, cardRouter);
+router.use('/users', auth, userRouter);
 
 export default router;
